@@ -1,0 +1,164 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>rrdmodify</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#environment_variables">ENVIRONMENT VARIABLES</a></li>
+	<li><a href="#authors">AUTHORS</a></li>
+</ul>
+
+-->
+
+
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>rrdmodify - Change the data source structure of an RRD</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>rrdtool</strong> {<strong>modify</strong>} [-d&nbsp;&lt;address ]&gt; [-s&nbsp;&lt;newstep ]&gt;
+<em>in-filename</em> <em>out-filename</em> 
+[&nbsp;<strong>DEL:</strong><em>ds-name</em>&nbsp;|&nbsp;<strong>DS:</strong><em>ds-spec</em>&nbsp;...&nbsp;]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The <strong>modify</strong> function copies an RRD file <em>in-filename</em> to
+<em>out-filename</em>, possible removing or adding data sources and
+round-robin archives (RRAs) on the fly. When <em>in-filename</em> and
+<em>out-filename</em> denote the same file, this is (almost) identical to an
+in-place modification.</p>
+<dl>
+<dt><strong><a name="d_address" class="item">-d&nbsp;&lt;address &gt;</a></strong></dt>
+
+<dd>
+<p>If given, <strong>RRDTool</strong> will try to connect to the caching daemon
+<a href="././rrdcached.html">the rrdcached manpage</a> at <em>address</em> to flush any data not yet written to the
+input RRD before reading it in. After writing the final file a FORGET
+command is sent to the daemon. This will make the daemon recognize the
+updated structure of the underlying RRD file.</p>
+</dd>
+<dt><strong><a name="s_newstep" class="item">-s&nbsp;&lt;newstep &gt;</a></strong></dt>
+
+<dd>
+<p>Changes the step size if the RRD to newstep. There are restrictions on
+the possible <em>newstep</em> that can be given, namely: The current
+stepping of the <em>in-filename</em> must be a multiple of the
+<em>newstep</em>. This also means that currently the step size can only be
+reduced.</p>
+<p>When giving this option, modifications to RRAs will be done AFTER
+adapting the step size, so any RRA specifications referring to counts
+of PDPs will allready use the new stepping.</p>
+<p>Note that changing the step size does NOT change the number of rows of
+any existing RRA by itself: Only the stepsize and assorted other meta
+values get changed (namely the PDP count of RRAs and possibly some CDP
+information).</p>
+<p>For a reduced step size to make sense in practice, it is usually a
+good idea to add one or more new RRAs with a step size of 1, because
+all existing RRAs will afterwards definitly have a pdp step count of
+larger than one, effectively hiding the step smaller size.</p>
+</dd>
+<dt><strong><a name="in_filename" class="item"><em>in-filename</em></a></strong></dt>
+
+<dd>
+<p>The name of the source <strong>RRD</strong> file you want to copy/modify.</p>
+</dd>
+<dt><strong><a name="out_filename" class="item"><em>out-filename</em></a></strong></dt>
+
+<dd>
+<p>The name of the destination <strong>RRD</strong> file. If it names the same file as
+<em>in-filename</em>, the new RRD will effectively relace the old one.</p>
+</dd>
+<dt><strong><a name="del_ds_name" class="item"><strong>DEL:</strong><em>ds-name</em></a></strong></dt>
+
+<dd>
+<p>Every data source named with a DEL specification will be removed
+during the copy operation. The resulting RRD will miss both the
+definition and the data for that data source. Multiple DEL
+specifications are permitted.</p>
+</dd>
+<dt><strong><a name="ds_ds_spec" class="item"><strong>DS:</strong><em>ds-spec</em></a></strong></dt>
+
+<dd>
+<p>For every such data source definition (for the exact syntax see the
+create command), a new data source will be added to the output
+RRD. Multiple DS specifications are permitted.</p>
+</dd>
+<dt><strong><a name="delrra_index" class="item"><strong>DELRRA:</strong><em>index</em></a></strong></dt>
+
+<dd>
+<p>Removes the RRA with index <em>index</em>.</p>
+</dd>
+<dt><strong><a name="rra_rra_spec" class="item"><strong>RRA:</strong><em>rra-spec</em></a></strong></dt>
+
+<dd>
+<p>For every such archive definition (for the exact syntax see the
+create command), a new RRA will be added to the output
+RRD. Multiple RRA specifications are permitted.</p>
+</dd>
+<dt><strong><a name="rra_index_number" class="item"><strong>RRA#</strong><em>index</em>:[+-=]&lt;number&gt;</a></strong></dt>
+
+<dd>
+<p>Adds/removes or sets the given number of rows for the RRA with index
+&lt;index&gt;.</p>
+</dd>
+<dt><strong><a name="daemon_address" class="item"><strong>--daemon</strong> <em>address</em></a></strong></dt>
+
+<dd>
+<p>If given, <strong>RRDTool</strong> will try to connect to the caching daemon
+<a href="././rrdcached.html">the rrdcached manpage</a> at <em>address</em> and will fail if the connection cannot be
+established. If the connection is successfully established the data
+for the <em>in-filename</em> will be flushed before performing the
+copy/modify operation. Afterwards the <em>out-filename</em> will be
+forgotten by the cache daemon, so that the next access using the
+caching daemon will read the proper structure.</p>
+<p>For a list of accepted formats, see the <strong>-l</strong> option in the <a href="././rrdcached.html">the rrdcached manpage</a> manual.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="environment_variables">ENVIRONMENT VARIABLES</a></h1>
+<p>The following environment variables may be used to change the behavior of
+<code>rrdtoolupdate</code>:</p>
+<dl>
+<dt><strong><a name="rrdcached_address" class="item"><strong>RRDCACHED_ADDRESS</strong></a></strong></dt>
+
+<dd>
+<p>If this environment variable is set it will have the same effect as specifying
+the <code>--daemon</code> option on the command line. If both are present, the command
+line argument takes precedence.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="authors">AUTHORS</a></h1>
+<p>Tobias Oetiker &lt;<a href="mailto:tobi@oetiker.ch">tobi@oetiker.ch</a>&gt;,
+Peter Stamfest &lt;<a href="mailto:peter@stamfest.at">peter@stamfest.at</a>&gt;</p>
+
+</body>
+
+</html>
